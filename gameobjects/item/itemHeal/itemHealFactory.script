@@ -1,0 +1,24 @@
+local function spawnItem() --Please refer to /gameobjects/item/itemAmmo/itemAmmoFactory.script for comments
+	local itemPos = vmath.vector3(0,0,0)
+	itemPos.x = math.random(-7000, 7000)
+	itemPos.y = math.random(-5000, 2800)
+	factory.create("#itemHealFactory", itemPos)
+end
+
+function init(self)
+	table.insert(factories, go.get_id())
+	self.itemsToSpawn = 2
+	math.randomseed(os.clock()*100000)
+	for i = 1,self.itemsToSpawn do
+		spawnItem()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newLevel") then
+		self.itemsToSpawn = 1 --Only spawns in 1 medkit as these make the game more challenging if there are less of them
+		for i = 1, self.itemsToSpawn do
+			spawnItem()
+		end
+	end
+end

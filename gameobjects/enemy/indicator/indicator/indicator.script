@@ -1,0 +1,35 @@
+local rendercam = require "rendercam.rendercam"
+local indicatorPos = vmath.vector3()
+
+function update(self, dt)
+	if indicatorToggle == true then
+		local enemyPos = go.get_position(self.id)
+		local playerPos = go.get_position("main:/player")
+		local direction = vmath.normalize(playerPos - enemyPos)
+		local distance = enemyPos - playerPos
+		local posNorm = vmath.normalize(distance) -- Performs calculations to find distance between enemy and player
+		distance.x = math.abs(distance.x)
+		distance.y = math.abs(distance.y)
+		local screenScale = rendercam.get_ortho_scale() / 2 -- Calculates size of actual screen with zoom factored in
+		if (distance.x >= (1920 * screenScale)) or (distance.x <= 0) or (distance.y >= (1080 * screenScale)) or (distance.y <= 0) then 	
+			msg.post("#sprite", "enable")	-- Checks if distance passes the actual screen dimensions and enables sprite
+			go.set_rotation(vmath.quat_rotation_z(math.atan2(direction.y, direction.x))) -- Calculates rotation using positions
+			go.set_position(playerPos + (posNorm * 300)) -- Adds number so that it rotates around player
+		else
+			msg.post("#sprite", "disable")
+		end
+	else
+		msg.post("#sprite", "disable") -- Disables sprite if toggle is off
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("enemyId") then -- Receives id from enemy when first spawned
+		self.id = message.enemyId
+	end
+	if message_id == hash("death") then
+		if self.id == message.enemyId then -- Compares id with enemies that die. If id's match, indicator is deleted.
+			go.delete()
+		end
+	end
+end

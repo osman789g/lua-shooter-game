@@ -1,0 +1,50 @@
+local function spawnRanged(self) --Script is mostly similar to melee one, please refer to /gameobjects/enemy/melee/enemyMFactoryScript.script for comments
+	self.spawnReadyRanged = true
+	self.spawnsLeftRanged = self.spawnsLeftRanged - 1
+	enemiesToSpawn = enemiesToSpawn - 1
+	enemyRangedNumber = enemyRangedNumber + 1
+	local pos = vmath.vector3(0,0,0)
+	pos.x = math.random(-7000, 7000)
+	pos.y = math.random(-5000, 2800)
+	factory.create("#enemyRangedFactory", pos)
+end
+
+local function spawnMelee(self) --Spawns an enemy each time it is called, updates variables to do with enemy counts
+	self.spawnReadyMelee = true --Sets cooldown between sets of enemies so that they are spawned in gradually
+	self.spawnsLeftMelee = self.spawnsLeftMelee - 1 --Removes 1 each time an enemy is spawned
+	enemiesToSpawn = enemiesToSpawn - 1
+	enemyMeleeNumber = enemyMeleeNumber + 1 --Increases current number of enemies on the map
+	local pos = vmath.vector3(0,0,0)
+	pos.x = math.random(-7000, 7000) --Sets spawn position at random x and y coordinates between
+	pos.y = math.random(-5000, 2800) --the boundaries of the map
+	factory.create("#enemyMeleeFactory", pos) --Spawns melee enemy at this random coordinate
+end
+
+function init(self)
+	table.insert(factories, go.get_id())
+	self.spawnsLeftMelee = math.ceil(enemiesToSpawn / 2)
+	self.spawnsLeftRanged = math.floor(enemiesToSpawn / 2)
+	self.spawnReadyMelee = true
+	self.spawnReadyRanged = true
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newLevel") then
+		self.spawnReadyMelee = true
+		self.spawnReadyRanged = true
+		self.spawnsLeftMelee = math.ceil(enemiesToSpawn / 2)
+		self.spawnsLeftRanged = math.floor(enemiesToSpawn / 2)
+	end
+end
+
+function update(self, dt)
+	if gamePaused == false then
+		if self.spawnReadyRanged == true and self.spawnsLeftRanged > 0 then
+			timer.delay(1, false, function() spawnRanged(self) end)
+			self.spawnReadyRanged = false
+		elseif self.spawnReadyMelee == true and self.spawnsLeftMelee > 0 then
+			timer.delay(1, false, function() spawnMelee(self) end)
+			self.spawnReadyMelee = false
+		end
+	end
+end

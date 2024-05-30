@@ -1,0 +1,2 @@
+prototype: "/gameobjects/enemy/indicator/indicator/indicator.go"
+load_dynamically: false

@@ -1,0 +1,33 @@
+--local function spawnMelee(self) --Spawns an enemy each time it is called, updates variables to do with enemy counts
+--	self.spawnReady = true --Sets cooldown between sets of enemies so that they are spawned in gradually
+--	self.spawnsLeft = self.spawnsLeft - 1 --Removes 1 each time an enemy is spawned
+--	enemiesToSpawn = enemiesToSpawn - 1
+--	enemyMeleeNumber = enemyMeleeNumber + 1 --Increases current number of enemies on the map
+--	local pos = vmath.vector3(0,0,0)
+--	pos.x = math.random(-7000, 7000) --Sets spawn position at random x and y coordinates between
+--	pos.y = math.random(-5000, 2800) --the boundaries of the map
+--	factory.create("#enemyMeleeFactory", pos) --Spawns melee enemy at this random coordinate
+--end
+--
+--function init(self) 
+--	--table.insert(factories, go.get_id()) --Adds itself to factory table, used to pass messages to multiple factories
+--	self.spawnsLeft = math.ceil(enemiesToSpawn / 2) --Divides number of enemies to spawn by 2 so that ranged and melee spawn same amount of enemies per level
+--	self.spawnReady = true
+--end
+--
+--function on_message(self, message_id, message, sender)
+--	if message_id == hash("newLevel") then
+--		self.spawnReady = true
+--		self.spawnsLeft = math.ceil(enemiesToSpawn / 2) --Updates enemy spawn number when new level message is passed
+--	end
+--end
+--
+--function update(self, dt)
+--	if gamePaused == false then --Stops spawning enemies when game is paused
+--		if self.spawnReady == true and self.spawnsLeft > 0 then --Only spawns enemies when off cooldown and there are still spawns remaining
+--			timer.delay(1, false, function() spawn(self) end) --1 second cooldown between enemy spawns
+--			self.spawnReady = false --Used to add delay to timer to prevent all enemies from being spawned instantly upon new level
+--		end
+--	end
+--end
+--

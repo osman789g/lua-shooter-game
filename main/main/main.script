@@ -1,0 +1,157 @@
+local rendercam = require "rendercam.rendercam"
+
+level = 1 --Sets up variables that can be accessed by all objects and scripts
+enemyRangedNumber = 0 --Stores the number of various objects that are currently on the map to perform various calculations
+enemyMeleeNumber = 0 --Stores the number of melee enemies currently on the level
+enemyTotalNumber = 0 --Stores the total number of enemies on the level. Essentially adds ranged + melee enemies together
+itemGrenadeCount = 0 --Stores number of grenades that the player currently has in their inventory
+itemMedkitCount = 0 --Stores number of medkits that the player currently has in their inventory
+enemiesToSpawn = 6 --Stores number of enemies to spawn initially
+currentEnemies = {} --Stores all current spawned enemies
+currentItems = {} --Stores all current items on the ground
+zoom = 3 --Stores current zoom level
+factories = {} --Stores the current active factories for easy message passing
+gamePaused = true --Stores whether the game is paused or not. Used by majority of game objects
+itemsTouching = {} 	--Stores a list of all the items a player is touching. Used to prevent bugs that occur when items spawn on top of each other
+					--and player attempts to pick them up
+sprintTime = 4
+
+local function powerupInstakill(self) --Runs when the instakill powerup ends
+	if self.instakillTimer <= 0 then 		--Only runs if there isn't another instakill timer active So that the damage remains high
+		guns[self.currentWeaponStore]["damage"] = self.currentDamage -- if another powerup is picked up before this one runs out
+	end --Restores the damage back to its base value for the current weapon
+end
+
+local function powerupNuke() --Posts the nuke message to all current living enemies
+	for i,v in ipairs(currentEnemies) do --Iterates over a table 
+		msg.post(v, "nuke") --Passes the message to each value
+	end
+end
+
+local function powerupRapidfire(self) --Runs when rapidfire powerup ends
+	guns[self.currentWeaponStore]["firerate"] = self.currentFirerate --Reverts firerate back to base
+	msg.post("weapon", "infiniteAmmoFalse") --Posts a message to weapon object to remove infinite ammo
+end
+
+function init(self)
+	self.sprintDelay = 0
+	self.newLevel = false --Stores whether a new level has started
+	self.instakillEnd = true --Stores whether powerup has ended
+	self.rapidfireEnd = true
+	msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 }) --Basic Defold render code
+	msg.post("@render:", "use_fixed_projection", { zoom = 1 })
+	msg.post(".", "acquire_input_focus")
+	msg.post("soundController", "menuMusic", {soundId = "#menuMusic", playState = "play"}) --Plays menu music when program first starts
+	defos.set_fullscreen(true) --Uses DefOS to set program to full screen
+	defos.set_cursor_visible(true) --Sets cursor to be enabled
+	defos.set_cursor(defos.CURSOR_CROSSHAIR) --Changes cursor to a + crosshair
+	self.sprinting = false
+end
+
+function update(self, dt)
+	enemyTotalNumber = enemyRangedNumber + enemyMeleeNumber
+	local enemyRemaining = enemyTotalNumber - enemiesToSpawn
+	if self.newLevel == false then
+		if (enemyTotalNumber <= 0) and (enemiesToSpawn <= 0) then --Checks if all enemies are dead and no spawns are left. Uses <= to prevent bugs
+			msg.post("main", "newLevel") --Posts new level message to gui
+			self.newLevel = true
+			for i,v in ipairs(currentItems) do 
+				msg.post(v, "newLevel") --Posts new level message to all items for them to despawn
+			end
+		end
+	end
+	if self.newLevel == true then --True directly after a new level starts
+		enemyRemaining = 0 --Resets all enemy numbers to 0 to further prevent bugs
+		enemyRangedNumber = 0
+		enemyMeleeNumber = 0
+		enemyBossNumber = 0
+		for i,v in ipairs(factories) do  --Posts message to all factories to spawn items
+			msg.post(v, "newLevel")
+		end
+		level = level + 1 --Increases level count
+		enemiesToSpawn = 6 + (8 * level) --Calculates number of enemies to be spawned in total. Increases as the level goes up
+		self.newLevel = false
+	end
+	if gamePaused == false then
+		if self.instakillEnd == false then
+			if self.instakillTimer > 0 then --Active when instakill powerup is enabled
+				if self.currentWeaponStore ~= currentWeapon then --Detects player picking up different weapon during powerup
+					guns[self.currentWeaponStore]["damage"] = self.currentDamage --Reverts stats of the last weapon to base
+					self.currentWeaponStore = currentWeapon
+					self.currentDamage = guns[self.currentWeaponStore]["damage"] --Stores base stats of current weapon for reference
+					guns[self.currentWeaponStore]["damage"] = 9999 --Increases stats of current weapon
+				end
+				self.instakillTimer = self.instakillTimer - dt
+			elseif self.instakillTimer <= 0 then
+				powerupInstakill(self) --When timer runs out, stats are reverted
+				self.instakillEnd = true
+			end 
+		end
+		if self.rapidfireEnd == false then --Same as instakill powerup
+			if self.rapidfireTimer > 0 then 
+				if self.currentWeaponStore ~= currentWeapon then
+					guns[self.currentWeaponStore]["firerate"] = self.currentFirerate
+					self.currentWeaponStore = currentWeapon
+					self.currentFirerate = guns[self.currentWeaponStore]["firerate"]
+					guns[currentWeapon]["firerate"] = 0.1
+				end
+				self.rapidfireTimer = self.rapidfireTimer - dt
+			elseif self.rapidfireTimer <= 0 then
+				self.rapidfireEnd = true
+				powerupRapidfire(self)
+			end
+		end
+		if sprintTime <= 4 and self.sprintState == false then
+			sprintTime = sprintTime + dt
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("enemyDeath") then --Creates blood splatter on where the enemy died
+		local enemyPos = message.pos
+		factory.create("#death", enemyPos)
+	end 
+	if message_id == hash("powerup") then
+		msg.post("soundController", "powerup", {soundId = "#powerup", playState = "play"}) --Plays powerup sound
+		self.currentWeaponStore = currentWeapon --Stores current weapon
+		self.powerup = message.powerup
+		if self.powerup == "instakill" then
+			if self.instakillEnd == true then
+				self.currentDamage = guns[currentWeapon]["damage"] --Stores base stats of current weapon
+				guns[currentWeapon]["damage"] = 9999 --Increases damage of weapon to 9999
+			end
+			self.instakillTimer = 15 --Starts 15 second timer
+			self.instakillEnd = false
+		elseif self.powerup == "nuke" then
+			powerupNuke()
+		elseif self.powerup == "rapidfire" then
+			if self.rapidfireEnd == true then
+				self.currentFirerate = guns[currentWeapon]["firerate"]
+				guns[currentWeapon]["firerate"] = 0.1 --Sets firerate to 0.1 after storing base firerate.
+				msg.post("weapon", "infiniteAmmo") --Posts message to weapon so that ammo is not removed when shooting
+			end
+			
+			if currentMagazine <= 0 then --Increases ammo to 2 if current magazine is 0, as player cannot shoot when on 0
+				currentMagazine = 2 --If increased to 1, reload message flashes constantly while shooting, so 2 is used.
+			end
+			self.rapidfireTimer = 15
+			self.rapidfireEnd = false
+		end
+	end
+	if message_id == hash("sprinting") then
+		self.sprintState = message.sprinting
+		if self.sprintState == false and self.timerStarted == false then
+			self.timerStarted = true
+			self.sprintDelay = 1
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("e") and action.pressed then --Sends pick up message to all items that the player is currently touching 
+		for i,v in ipairs(itemsTouching) do
+			msg.post(v, "pickupItem")
+		end
+	end
+end

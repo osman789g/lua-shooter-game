@@ -1,0 +1,203 @@
+function init(self)
+	local playerMaxHealth = 100
+	self.score = 0
+	self.dead = false
+	
+	self.scoreNode = gui.get_node("score") --Stores all gui nodes in their variables
+	self.medkitNode = gui.get_node("medkit")
+	self.pickupNode = gui.get_node("pickup")
+	self.healthbarVariable = gui.get_node("healthbarVariable")
+	self.healthbarBase = gui.get_node("healthbarBase")
+	self.healthNode = gui.get_node("health")
+	self.scoreNodeScale = gui.get_scale(self.scoreNode)
+	self.weaponNode = gui.get_node("weapon")
+	self.ammoNode = gui.get_node("ammo")
+	self.levelNode = gui.get_node("level")
+	self.deathNode = gui.get_node("death")
+	self.grenadeNode = gui.get_node("grenade")
+	self.instakillNode = gui.get_node("instakill")
+	self.rapidfireNode = gui.get_node("rapidfire")
+	self.instakillBox = gui.get_node("instakillBox")
+	self.rapidfireBox = gui.get_node("rapidfireBox")
+	self.sprintBar = gui.get_node("sprintBar")
+	self.sprintDrainNode = gui.get_node("sprintDrain")
+	
+	self.deathScore = gui.get_node("deathScore")
+	self.deathLevel = gui.get_node("deathLevel")
+
+	self.medkitBox = gui.get_node("medkitBox")
+	self.weaponBox = gui.get_node("weaponBox")
+	self.grenadeBox = gui.get_node("grenadeBox")
+	self.statsBox = gui.get_node("statsBox")
+
+	self.deathMenu = gui.get_node("deathMenu")
+	
+	self.instakillTimer = false
+	self.rapidfireTimer = false
+	
+	gui.set_enabled(self.deathNode, false)
+	gui.set_enabled(self.instakillBox, false)
+	gui.set_enabled(self.rapidfireBox, false)
+	--gui.move_above(self.healthbarVariable, self.healthbarBase)
+	gui.set_text(self.healthNode, "100")
+	gui.set_text(self.ammoNode, currentMagazine .. " / " .. currentAmmo)
+	
+	self.guiTable = {} --Stores certain gui elements in a table so that when the player dies or pause screen is shown they can all be disabled at once
+	table.insert(self.guiTable, self.scoreNode)
+	table.insert(self.guiTable, self.pickupNode)
+	table.insert(self.guiTable, self.healthbarVariable)
+	table.insert(self.guiTable, self.healthbarBase)
+	table.insert(self.guiTable, self.healthNode)
+	table.insert(self.guiTable, self.weaponNode)
+	table.insert(self.guiTable, self.levelNode)
+	table.insert(self.guiTable, self.sprintBar)
+	table.insert(self.guiTable, self.sprintDrainNode)
+	
+	table.insert(self.guiTable, self.medkitBox)
+	table.insert(self.guiTable, self.weaponBox)
+	table.insert(self.guiTable, self.grenadeBox)
+	table.insert(self.guiTable, self.statsBox)
+	self.sprintScale = gui.get_scale(self.sprintDrainNode)
+
+end
+
+local function scale_down(self, node) --Animates the score node so that it vibrates when the score increases
+	local s = self.scoreNodeScale
+	gui.animate(node, gui.PROP_SCALE, vmath.vector4(s.x, s.y, s.z, 0), gui.EASING_OUT, 0.05)
+end
+
+function update(self, dt)
+	if gamePaused == true then
+		if self.dead == true then
+			gui.set_enabled(self.deathNode, false) --Disables all death nodes when game is paused
+			msg.post(".", "release_input_focus")
+		end
+		for i,v in ipairs(self.guiTable) do --Disables table of nodes
+			gui.set_enabled(v, false)
+		end
+		if self.instakillTimer == true or self.rapidfireTimer == true then --Disables all powerups
+			gui.set_enabled(self.instakillBox, false)
+			gui.set_enabled(self.rapidfireBox, false)
+		end
+	end
+	
+	if gamePaused == false then
+		for i,v in ipairs(self.guiTable) do --Enables table of nodes when unpaused
+			gui.set_enabled(v, true)
+		end
+		if self.dead == true then
+			for i,v in ipairs(self.guiTable) do --Disables table of nodes when unpaused but dead
+				gui.set_enabled(v, false)
+			end
+			gui.set_enabled(self.instakillBox, false) --Enables death nodes
+			gui.set_enabled(self.rapidfireBox, false)
+			gui.set_enabled(self.deathNode, true)
+			msg.post(".", "acquire_input_focus")
+		end
+
+		self.sprintScale.x = (sprintTime / 2)
+		gui.set_scale(self.sprintDrainNode, self.sprintScale)
+		
+		if self.rapidfireTimer == true then --Timers for powerups
+			gui.set_enabled(self.rapidfireBox, true)
+			self.rapidfireTimeLeft = self.rapidfireTimeLeft - dt
+			local timeLeft = string.format("%.2f", self.rapidfireTimeLeft)
+			gui.set_text(self.rapidfireNode, "Rapidfire: " .. timeLeft)
+			if self.rapidfireTimeLeft < 0 then
+				self.rapidfireTimer = false
+				gui.set_enabled(self.rapidfireBox, false) --Disables node when timer not active
+			end
+		end
+		if self.instakillTimer == true then --Same as rapid fire powerup
+			gui.set_enabled(self.instakillBox, true)
+			self.instakillTimeLeft = self.instakillTimeLeft - dt
+			local timeLeft = string.format("%.2f", self.instakillTimeLeft)
+			gui.set_text(self.instakillNode, "Instakill: " .. timeLeft)
+			if self.instakillTimeLeft < 0 then
+				self.instakillTimer = false
+				gui.set_enabled(self.instakillBox, false)
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash ("setHealth") then --Receives updates on health
+		local percentHealth = message.percentHealth
+		local health = message.health
+		gui.set_text(self.healthNode, health) --Sets text to health number
+		local scale = gui.get_scale(self.healthbarVariable) --Sets healthbar scale to healthbar percentage
+		scale.x=percentHealth * 2
+		gui.set_scale(self.healthbarVariable, scale) 
+		local position = gui.get_position(self.healthbarVariable)
+	end
+	if message_id == hash("meleeDeath") then --Updates score when enemy dies
+		local s = self.scoreNodeScale * 1.4
+		self.score = self.score + 100
+		gui.set_text(self.scoreNode, ("Score: " .. tostring(self.score)))
+		gui.animate(self.scoreNode, gui.PROP_SCALE, vmath.vector4(s.x, s.y, s.z, 0), gui.EASING_OUT, 0.1, 0.0, scale_down)
+	elseif message_id == hash("rangedDeath") then
+		local s = self.scoreNodeScale * 1.4
+		self.score = self.score + 150
+		gui.set_text(self.scoreNode, ("Score: " .. tostring(self.score)))
+		gui.animate(self.scoreNode, gui.PROP_SCALE, vmath.vector4(s.x, s.y, s.z, 0), gui.EASING_OUT, 0.1, 0.0, scale_down)
+	end
+	if message_id == hash("medkit") then --Updates item counts
+		gui.set_text(self.medkitNode, itemMedkitCount)
+	end
+	if message_id == hash("grenade") then
+		gui.set_text(self.grenadeNode, itemGrenadeCount)
+	end
+	if message_id == hash("pickupTrue") then --Shows when player can pick up an item
+		gui.set_text(self.pickupNode, ("[E] to pick up " .. message.item))
+	end
+	if message_id == hash("pickupFalse") then --Hides when the player can no longer pick up an item
+		gui.set_text(self.pickupNode, (""))
+	end
+	if message_id == hash("changeWeapon") then --Changes sprite of weapon in the box if weapon changes
+		local anim = hash(currentWeapon .. "Idle")
+		gui.play_flipbook(self.weaponNode, anim)
+	end
+	if message_id == hash("shoot") or message_id == hash("reloaded") then --Updates ammo and magazine count
+		gui.set_text(self.ammoNode, currentMagazine .. " / " .. currentAmmo)
+	end
+	if message_id == hash("newLevel") then --Changes level text upon level update
+		gui.set_text(self.levelNode, "Level: " .. level)
+	end
+	if message_id == hash("dead") then --Displays final score, level and updates variable when player dies
+		self.dead = true
+		gui.set_text(self.deathScore, ("Final score: " .. tostring(self.score)))
+		gui.set_text(self.deathLevel, ("Final level: " .. level))
+		msg.post(".", "acquire_input_focus")
+	end
+	if message_id == hash("powerup") then --Starts powerup timers upon receiving message from main#script
+		local powerup = message.powerup
+		if powerup == "instakill" then
+			self.instakillTimer = true
+			self.instakillTimeLeft = 15
+		elseif powerup == "rapidfire" then
+			self.rapidfireTimer = true
+			self.rapidfireTimeLeft = 15
+		end
+	end
+
+	if message_id == hash("sprinting") then
+		local sprintState = message.sprinting
+		if sprintState == true then 
+			self.sprintDrain = true
+		else
+			self.sprintDrain = false
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("lclick") and action.pressed then --Detects when player clicks on menu butto nwhen dead
+		if gui.pick_node(self.deathMenu, action.x, action.y) and self.dead == true then
+			gui.set_enabled(self.deathNode, false)
+			local arg = "build/default/game.projectc"
+			msg.post("@system:", "reboot", {arg = arg}) --Reloads the program
+			msg.post(".", "release_input_focus")
+		end
+	end
+end

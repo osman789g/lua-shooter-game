@@ -1,0 +1,190 @@
+local gameStarted = false --Stores whether the game has started yet
+local controls = false --Stores whether the player is currently on the controls screen
+local custom = false
+local screens = false
+
+
+local function anim5(self, node)
+	gui.set_scale(node, self.nodeScale)
+end
+
+local function anim4(self, node)
+	local s = self.nodeScale
+	gui.animate(node, gui.PROP_SCALE, vmath.vector4(s.x, s.y, s.z, 0), gui.EASING_INOUT, 0.2, 0, anim5)
+end
+
+local function anim3(self, node)
+	local s = self.nodeScale * 1.06
+	gui.animate(node, gui.PROP_SCALE, vmath.vector4(s.x, s.y, s.z, 0), gui.EASING_INOUT, 0.2, 0, anim4)
+end
+
+local function anim2(self, node)
+	local s = self.nodeScale * 0.98
+	gui.animate(node, gui.PROP_SCALE, vmath.vector4(s.x, s.y, s.z, 0), gui.EASING_INOUT, 0.2, 0, anim3)
+end
+
+local function anim1(node, d, self)
+	local s = self.nodeScale * 0.7
+	gui.set_scale(node, vmath.vector4(s.x, s.y, s.z, 0))
+	s = self.nodeScale * 1.1
+	gui.animate(node, gui.PROP_SCALE, vmath.vector4(s.x, s.y, s.z, 0), gui.EASING_IN, 0.3, d, anim2)
+end
+
+
+
+
+
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.newGameNode = gui.get_node("newGame")
+	self.quitNode = gui.get_node("quit")
+	self.controlsNode = gui.get_node("controls")
+	self.menu = gui.get_node("menu")
+	self.background = gui.get_node("background")
+	
+	self.controlsScreen = gui.get_node("controlsScreen")
+	self.backControlsNode = gui.get_node("backControls")
+	
+	self.pause = gui.get_node("pause")
+	self.newGameNodePaused = gui.get_node("newGamePaused")
+	self.quitNodePaused = gui.get_node("quitPaused")
+	self.controlsNodePaused = gui.get_node("controlsPaused") --Stores all menu nodes as variables 
+	self.restartNode = gui.get_node("restart")
+
+	self.backCustomNode = gui.get_node("backCustom")
+	self.customScreen = gui.get_node("customScreen")
+	self.customNode = gui.get_node("custom")
+	self.nextHead = gui.get_node("nextHead")
+	self.previousHead = gui.get_node("previousHead")
+	self.headAnimation = gui.get_node("headAnimation")
+	self.currentHeadText = gui.get_node("currentHeadText")
+	self.headCounter = 1
+	self.helmetStore = self.headCounter
+	self.nodeScale = gui.get_scale(self.background)
+	
+	gui.set_enabled(self.controlsScreen, false) --Disables pause and controls screen on startup
+	gui.set_enabled(self.customScreen, false)
+	gui.set_enabled(self.pause, false)
+	local d = 0.25
+	anim1(self.background, d, self) --Plays small intro animation when the game is opened
+
+	self.helmetOptions = {"idleRightSkin1", "idleRightSkin2", "idleRightSkin3", "idleRightSkin4", "idleRightSkin5"}
+	self.helmetColours = {"Green", "Purple", "Blue", "Yellow", "Rainbow"}
+	self.helmetChoice = self.helmetOptions[self.headCounter]
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then --Pauses the game
+		msg.post(".", "enable")
+		msg.post(".", "acquire_input_focus")
+		msg.post("soundController", "pause")
+		if gameStarted == true then --Checks if the pause screen or menu screen should be used by checking if the game has started yet
+			gui.set_enabled(self.pause, true)
+			gui.set_enabled(self.menu, false)
+		else
+			gui.set_enabled(self.menu, true)
+			gui.set_enabled(self.pause, false)
+		end
+	elseif message_id == hash("hide") then --Unpauses the game
+		msg.post("soundController", "unpause")
+		msg.post(".", "release_input_focus")
+		msg.post(".", "disable")
+		if gameStarted == false then
+			gameStarted = true
+			gui.set_enabled(self.menu, false)
+		end
+		gui.set_enabled(self.pause, false)
+	end
+end
+
+function on_input(self, action_id, action)
+	if gameStarted == false then
+		if action_id == hash("lclick") and action.pressed then --Detects when the user clicks on a button with left click
+			if gui.pick_node(self.newGameNode, action.x, action.y) and screens == false then --Starts game
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"}) --Plays sound on button click
+				gamePaused = false
+				gameStarted = true
+				msg.post("soundController", "startMusic")
+				msg.post(".", "hide") --Disables menu
+				msg.post("#gui", "unload")
+			elseif gui.pick_node(self.quitNode, action.x, action.y) and screens == false then --Exits game
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				sys.exit(0)
+			elseif gui.pick_node(self.controlsNode, action.x, action.y) and screens == false then --Controls screen
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				controls = true
+				gui.set_enabled(self.menu, false)
+				gui.set_enabled(self.controlsScreen, true)
+			elseif gui.pick_node(self.backControlsNode, action.x, action.y) or gui.pick_node(self.backCustomNode, action.x, action.y) then --Back button (controls -> main menu)
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				controls = false
+				custom = false
+				gui.set_enabled(self.menu, true)
+				gui.set_enabled(self.controlsScreen, false)
+				gui.set_enabled(self.customScreen, false)
+			elseif gui.pick_node(self.customNode, action.x, action.y) and screens == false then
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				gui.set_enabled(self.menu, false)
+				gui.set_enabled(self.customScreen, true)
+				custom = true
+			elseif gui.pick_node(self.nextHead, action.x, action.y) and custom == true then
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				self.headCounter = self.headCounter + 1
+			elseif gui.pick_node(self.previousHead, action.x, action.y) and custom == true then
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				self.headCounter = self.headCounter - 1
+			end
+		end
+	else
+		if action_id == hash("lclick") and action.pressed then --Same as other section of code, only active when using pause screen rather than main menu screen
+			if gui.pick_node(self.newGameNodePaused, action.x, action.y) and controls == false then
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				gamePaused = false
+				msg.post(".", "hide")
+			elseif gui.pick_node(self.quitNodePaused, action.x, action.y) and controls == false then
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				sys.exit(0)
+			elseif gui.pick_node(self.controlsNodePaused, action.x, action.y) then
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				gui.set_enabled(self.controlsScreen, true)
+				gui.set_enabled(self.pause, false)
+				controls = true
+			elseif gui.pick_node(self.backControlsNode, action.x, action.y) then
+				msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+				gui.set_enabled(self.pause, true)
+				gui.set_enabled(self.controlsScreen, false)
+				controls = false
+			elseif gui.pick_node(self.restartNode, action.x, action.y) then
+				gui.set_enabled(self.pause, false)
+				local arg = "build/default/game.projectc"
+				msg.post("@system:", "reboot", {arg = arg}) --Reloads the program
+				msg.post(".", "release_input_focus")
+			end
+		end
+	end
+end
+
+function update(self, dt)
+	if custom == true or controls == true then
+		screens = true
+	else
+		screens = false
+	end
+
+	if self.headCounter < 1 then
+		self.headCounter = 5
+		gui.set_text(self.currentHeadText, self.helmetColours[self.headCounter])
+	elseif self.headCounter > 5 then
+		self.headCounter = 1
+		gui.set_text(self.currentHeadText, self.helmetColours[self.headCounter])
+	end
+	gui.set_text(self.currentHeadText, self.helmetColours[self.headCounter])
+	
+	self.helmetChoice = self.helmetOptions[self.headCounter]
+	if self.helmetStore ~= self.headCounter then
+		gui.play_flipbook(self.headAnimation, self.helmetChoice)
+		self.helmetStore = self.headCounter
+		msg.post("player", "newSkin", {skin = self.headCounter})
+	end
+end

@@ -1,0 +1,44 @@
+local pickup = false --Please refer to /gameobjects/item/itemAmmo/itemAmmo.script for comments
+medkitTouching = ""
+
+function init(self)
+	local s = go.get_scale()
+	s = s / 3
+	go.set_scale(s)
+	self.id = go.get_id()
+	table.insert(currentItems, self.id)
+end
+
+function final(self)
+	table.remove(currentItems, currentItems[self.id])
+	table.remove(itemsTouching, itemsTouching[self.id])
+	msg.post("main#gui", "pickupFalse")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.other_group == hash("player") then
+			if message.enter then
+				pickup = true
+				medkitTouching = self.id
+				msg.post("main#gui", "pickupTrue", {item = "medkit"})
+				table.insert(itemsTouching, self.id)
+			else
+				pickup = false
+				msg.post("main#gui", "pickupFalse")
+				table.remove(itemsTouching, itemsTouching[self.id])
+			end
+		end
+	end
+	if message_id == hash("newLevel") then
+		go.delete()
+	end
+	if message_id == hash("pickupItem") then
+		msg.post("soundController", "pickup", {soundId = "#pickup", playState = "play"})
+		itemMedkitCount = itemMedkitCount + 1
+		msg.post("main#gui", "medkit")
+		pickup = false
+		msg.post("main#gui", "pickupFalse")
+		go.delete(medkitTouching)
+	end
+end

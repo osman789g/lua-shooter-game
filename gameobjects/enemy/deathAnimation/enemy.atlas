@@ -1,0 +1,326 @@
+animations {
+  id: "enemyMeleeIdleRight"
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeIdle/enemyMeleeIdle/enemyMeleeIdle0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeIdle/enemyMeleeIdle/enemyMeleeIdle1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeIdle/enemyMeleeIdle/enemyMeleeIdle2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeIdle/enemyMeleeIdle/enemyMeleeIdle3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemyMeleeIdleLeft"
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeIdle/enemyMeleeIdle/enemyMeleeIdle0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeIdle/enemyMeleeIdle/enemyMeleeIdle1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeIdle/enemyMeleeIdle/enemyMeleeIdle2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeIdle/enemyMeleeIdle/enemyMeleeIdle3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 1
+  flip_vertical: 0
+}
+animations {
+  id: "enemyMeleeWalkRight"
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun5.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun6.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemyMeleeWalkLeft"
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun5.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyMeleeRun/enemyMeleeRun/enemyMeleeRun6.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 1
+  flip_vertical: 0
+}
+animations {
+  id: "enemyRangedIdleRight"
+  images {
+    image: "/assets/enemyAnimations/enemyRangedIdle/enemyRangedIdle/enemyRangedIdle0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedIdle/enemyRangedIdle/enemyRangedIdle1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedIdle/enemyRangedIdle/enemyRangedIdle2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedIdle/enemyRangedIdle/enemyRangedIdle3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemyRangedIdleLeft"
+  images {
+    image: "/assets/enemyAnimations/enemyRangedIdle/enemyRangedIdle/enemyRangedIdle0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedIdle/enemyRangedIdle/enemyRangedIdle1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedIdle/enemyRangedIdle/enemyRangedIdle2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedIdle/enemyRangedIdle/enemyRangedIdle3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 1
+  flip_vertical: 0
+}
+animations {
+  id: "enemyRangedWalkRight"
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun5.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun6.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemyRangedWalkLeft"
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun5.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyRangedRun/enemyRangedRun/enemyRangedRun6.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 1
+  flip_vertical: 0
+}
+animations {
+  id: "death"
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_00.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_01.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_02.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_03.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_04.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_05.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_06.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_07.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_08.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_09.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_10.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_11.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_12.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_13.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_14.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_15.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_16.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_17.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_18.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_19.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/enemyAnimations/enemyDeath/sprite_20.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 24
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

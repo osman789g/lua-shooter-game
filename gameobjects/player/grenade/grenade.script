@@ -1,0 +1,30 @@
+local function delete()
+	go.delete()
+end
+
+local function explode(self)
+	msg.post("soundController", "grenadeExplode", {soundId = "#grenadeExplode", playState = "play"})
+	self.exploding = true
+	go.set(".", "euler.z", 0) --Resets rotation of the explosion
+	local anim = hash("explode") 
+	msg.post("#collision", "enable") --Enables collisions so that enemies touching the explosion will be registered
+	msg.post("#sprite", "play_animation", { id = anim }) --Plays explosion animation
+	timer.delay(0.82, false, function() delete() end) --Deletes the object after the animation has finished
+end
+
+function init(self)
+	self.explodeDelay = 1
+	self.exploding = false
+	msg.post("#collision", "disable")
+	go.set(".", "euler.z", 0) --Rotates the grenade as it is thrown to give it a spin
+	go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, 360, go.EASING_LINEAR, 1)
+end
+
+function update(self, dt)
+	if gamePaused == false and self.explodeDelay > 0 then --Counts down until it explodes while game is not paused
+		self.explodeDelay = self.explodeDelay - dt
+	end
+	if self.explodeDelay <= 0 and self.exploding == false then --Once countdown reaches 0, grenade explodes
+		explode(self)
+	end	
+end

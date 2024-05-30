@@ -1,0 +1,255 @@
+local speedDefault = 600
+local sprintSpeed = 950
+local speed = speedDefault --Stores current speed
+local rendercam = require "rendercam.rendercam"
+local usingMedkit = false --Stores whether the player is currently using a medkit
+playerDead = false
+local white = vmath.vector4(1, 1, 1, 1) --Stores the rgb value for white. Used by labels to reset their colour
+local sprintSound = false
+local walkSound = false
+local currentSkin = "Skin1"
+
+local function damageCooldown(self) --Invincibility timer
+	self.damageReady = true
+end
+
+local function healthbarLabel() --Runs when medkit is fully used
+	
+	label.set_text("#healthbar", "") --Sets the label to blank so that it disappears
+	go.set("#healthbar", "color", white) --Resets the colour to white
+end
+
+local function useMedkit(self)
+	self.currentHealth = self.currentHealth + 50 --Adds 50 health
+	if self.currentHealth > self.maxHealth then --Up to a limit (100)
+		self.currentHealth = self.maxHealth
+	end
+	itemMedkitCount = itemMedkitCount - 1 --Removes medkit from inventory
+	msg.post("main", "setHealth", {health = self.currentHealth, percentHealth = (self.currentHealth / self.maxHealth)}) --Updates main with the health
+	local green = vmath.vector4(0, 1, 0, 1) --Stores the rgb for green
+	go.set("#healthbar", "color", green) --Sets the colour of the text to green so that the player knows they have completed the healing
+	timer.delay(0.75, false, function() healthbarLabel() end) --Adds a small delay so that the player can see that their timer reached 0.00
+	usingMedkit = false
+	self.timer = 4 --Resets the timer for the medkit being used
+	msg.post("main#gui", "medkit") --Posts message to update gui medkit number
+	msg.post("soundController", "healComplete", {soundId = "#healComplete", playState = "play"}) --Play sound of the healing finishing
+end
+
+function init(self)
+	self.playbackRate = go.get("#sprite", "playback_rate")
+	self.playerDead = false
+	self.timer = 4 --Sets medkit timer to 4
+	self.damageReady = false --Sets invincibility status to true temporarily
+	msg.post("." , "acquire_input_focus")
+	self.maxHealth = 100
+	self.currentHealth = self.maxHealth
+	self.dir = vmath.vector3()
+	self.damageCooldownTimer = 3 --Sets invincibility timer
+	self.animDirection = "Right"
+	local spawn = vmath.vector3(0,0,0)
+	go.set_position(spawn)
+	timer.delay(5, false, function() damageCooldown(self) end) --Removes invincibility after 5 seconds
+	timer.delay(0.01, false, function() rendercam.zoom(100) end) --Sets the zoom to 100 by default.
+	indicatorToggle = true --Stores indicator toggle status
+	self.gameStarted = false
+	self.sprinting = false
+end
+
+
+function on_input(self, action_id, action)
+	if action_id == hash("i") and action.pressed then
+		msg.post("#buttonClick", "play_sound")
+		if indicatorToggle == true then --Toggles indicators
+			indicatorToggle = false
+		else
+			indicatorToggle = true
+		end
+	end
+	
+	if action_id == hash("esc") and action.pressed and gamePaused == false then --Toggles pause screen
+		gamePaused = true
+		msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+		msg.post("menu", "show")
+	elseif action_id == hash("esc") and action.pressed and gamePaused == true and self.gameStarted == true then
+		msg.post("menu", "hide")
+		msg.post("soundController", "buttonClick", {soundId = "#buttonClick", playState = "play"})
+		gamePaused = false
+	end
+
+	
+	if action_id == hash("shift") and action.pressed then --Sets speed to sprint speed while shift is held
+		self.sprinting = true
+	elseif action_id == hash("shift") and action.released then
+		self.sprinting = false
+	end
+	
+	if action_id == hash("down") then --Movement script
+		self.dir.y = -speed
+	elseif action_id == hash("up") then
+		self.dir.y = speed
+	elseif action_id == hash("left") then --Horizontal movement flips running animation
+		self.dir.x = -speed
+		self.animDirection = "Left"
+	elseif action_id == hash("right") then
+		self.dir.x = speed
+		self.animDirection = "Right"
+	end
+
+	if gamePaused == false then
+		if action_id == hash("scrollup") and zoom < 5 then --Allows player to zoom in or out with scroll up to a limit
+			rendercam.zoom(-15)
+			zoom = zoom + 1
+		elseif action_id == hash("scrolldown") and zoom > - 5 then
+			rendercam.zoom(15)
+			zoom = zoom - 1
+		end
+		if action_id == hash("x") and action.pressed then
+			if itemMedkitCount > 0 and usingMedkit == false then --Begins using medkit
+				msg.post(".", "useMedkit")
+			end
+		end
+	end
+end
+ 
+function update(self, dt)
+	if currentMagazine <= 0 then
+		if currentAmmo <= 0 then
+			local red = vmath.vector4(1, 0, 0, 1) --Sets label to red if no reserve ammo or magazine ammo
+			go.set("#reload", "color", red)
+			label.set_text("#reload", "No ammo")
+		else
+			local yellow = vmath.vector4(1, 1, 0, 1)--Sets label to yellow if no magazine ammo
+			go.set("#reload", "color", yellow)
+			label.set_text("#reload", "[R] to reload")
+		end
+	else
+		label.set_text("#reload", "") --Removes label
+	end
+	go.set("#sprite", "playback_rate", self.playbackRate)
+	if gamePaused == false then
+		if self.sprinting == true and sprintTime > 0 then
+			sprintTime = sprintTime - dt
+			msg.post("main", "sprinting", {sprinting = true})
+			self.playbackRate = 1.35
+			speed = sprintSpeed
+		else
+			speed = speedDefault --Sets speed back to walking speed
+			self.playbackRate = 1
+			msg.post("main", "sprinting", {sprinting = false})
+		end
+
+		if self.gameStarted == false then
+			self.gameStarted = true
+		end
+		if usingMedkit == true and self.timer > 0 then
+			self.timer = math.max(self.timer - dt, 0)
+			local l = string.format("%.2fs", self.timer) --Sets label to remaining time for medkit to 2 s.f.
+			label.set_text("#healthbar", l)
+		end
+		if vmath.length_sqr(self.dir) > 1 then
+			self.dir = vmath.normalize(self.dir)
+		end
+		local p = go.get_position()
+		go.set_position(p + self.dir * speed * dt) 
+		if self.dir.x ~= 0 or self.dir.y ~= 0 then --Detects player movement
+			if speed == sprintSpeed and sprintSound == false then
+				--local playback_rate = go.get("#sprite", "playback_rate")
+				--go.set("#sprite", "playback_rate", playback_rate * 2)
+				msg.post("soundController", "moveSprint", {soundId = "#moveSprint", playState = "play"})
+				msg.post("soundController", "moveWalk", {soundId = "#moveWalk", playState = "stop"})--Plays sprint sound or walk sound by comparing speeds to the base speed values
+				sprintSound = true
+				walkSound = false
+			elseif speed == speedDefault and walkSound == false then
+				msg.post("soundController", "moveSprint", {soundId = "#moveSprint", playState = "stop"})
+				msg.post("soundController", "moveWalk", {soundId = "#moveWalk", playState = "play"})
+				sprintSound = false
+				walkSound = true
+			end
+		else
+			msg.post("soundController", "moveSprint", {soundId = "#moveSprint", playState = "stop"})
+			msg.post("soundController", "moveWalk", {soundId = "#moveWalk", playState = "stop"})
+			sprintSound = false
+			walkSound = false
+		end
+		
+		local anim = hash("idle" .. self.animDirection .. currentSkin)
+		if self.dir.x ~= 0 then
+			anim = hash("walk" .. self.animDirection .. currentSkin)
+		elseif self.dir.y > 0 then
+			anim = hash("walk" .. self.animDirection .. currentSkin)
+		elseif self.dir.y < 0 then
+			anim = hash("walk" .. self.animDirection .. currentSkin)
+		end
+		if anim ~= self.currentAnim then
+			msg.post("#sprite", "play_animation", { id = anim })
+			self.currentAnim = anim
+		end
+		if usingMedkit == true then
+			if self.dir.x ~= 0 or self.dir.y ~= 0 then --Detects movement if a medkit is being used
+				usingMedkit = false --Cancels the medkit and timer
+				msg.post("soundController", "healing", {soundId = "#healing", playState = "stop"})
+				timer.cancel(self.useMedkit)
+				self.timer = 4
+				local red = vmath.vector4(1, 0, 0, 1)
+				go.set("#healthbar", "color", red) 							--Sets the label to red for a small amount of time 
+				timer.delay(0.75, false, function() healthbarLabel() end) 	--so that it clearly shows the player how much time they had left
+			end
+		end 
+		self.dir = vmath.vector3()
+
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newSkin") then
+		currentSkin = "Skin" .. message.skin
+	end
+	
+	if message.other_group == hash("enemy") then --Detects collisions with enemies or enemy bullets, then removes health
+		if message_id == hash("trigger_response") then 
+			if message.enter then
+				if self.damageReady == true then --Checks if the invincibility is off cooldown
+					msg.post("main", "setHealth", {health = self.currentHealth, percentHealth = (self.currentHealth / self.maxHealth)})
+					self.currentHealth = self.currentHealth - 20
+					self.damageReady = false --Gives the player invincibility to prevent repeated hits
+					msg.post("soundController", "playerDamage", {soundId = "#playerDamage", playState = "play"})
+					timer.delay(self.damageCooldownTimer, false, function() damageCooldown(self) end)
+				end
+			end
+		end
+		if message_id == hash("collision_response") then --Same as trigger_response
+			if self.damageReady == true then
+				self.currentHealth = self.currentHealth - 20
+				msg.post("main", "setHealth", {health = self.currentHealth, percentHealth = (self.currentHealth / self.maxHealth)})
+				self.damageReady = false
+				msg.post("soundController", "playerDamage", {soundId = "#playerDamage", playState = "play"})
+				timer.delay(self.damageCooldownTimer, false, function() damageCooldown(self) end)
+			end
+		end
+	end
+	if (self.currentHealth <= 0) and (self.playerDead == false) then --Stops all player sounds when player dies
+		self.playerDead = true --Disables all game objects to do with player
+		playerDead = true
+		msg.post("main", "dead")
+		local soundList = {"#healing", "#healComplete", "#moveWalk", "#moveSprint"}
+		for soundItem in soundList do
+			msg.post("soundController", soundList[soundItem], {soundId = soundItem, playState = "stop"})
+		end
+		msg.post("soundController", "playerDeath", {soundId = "#playerDeath", playState = "play"})
+		msg.post("grenade", "disable")
+		msg.post("weapon", "disable")
+		msg.post("bullet", "disable") 
+		msg.post(".", "disable")
+	end
+	if message_id == hash("useMedkit") then --Starts medkit timer
+		usingMedkit = true
+		go.set("#healthbar", "color", white)
+		msg.post("soundController", "healing", {soundId = "#healing", playState = "play"})
+		self.useMedkit = timer.delay(4, false, function() useMedkit(self) end)
+	end
+
+	if message_id == hash("contact_point_response") then --Prevents player from walking off the boundaries of the map
+		local newPos = go.get_position() + message.normal * message.distance
+		go.set_position(newPos)
+	end
+end

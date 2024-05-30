@@ -1,0 +1,111 @@
+
+function init(self) -- Sets up id, spawns indicators and attributes
+	self.speed = 20 + (3*level)
+	if self.speed > 30 then -- Calculates movement speed
+		self.speed = 30
+	end
+	
+	self.enemyPos = go.get_position()
+	self.id = go.get_id()
+	table.insert(currentEnemies, self.id)
+	self.indicatorId = factory.create("#enemyIndicator", self.enemyPos)
+	msg.post(self.indicatorId, "enemyId", {enemyId = self.id})
+	self.current_anim = nil
+	self.detectionRange = 1300
+	self.maxHealth = 100
+	self.currentHealth = self.maxHealth
+	self.dir = vmath.vector3()
+	self.animDirection = "Right"
+	go.set_scale(0.5)
+end
+
+function final(self)
+	math.randomseed(os.clock()*100000)
+	local powerupChance = math.random(1,10) --10% chance to spawn powerup
+	if powerupChance == 1 then
+		msg.post("powerupFactory", "spawnPowerup", {position = self.enemyPos})
+	end
+	msg.post(self.indicatorId, "death",  {enemyId = self.id})
+	enemyMeleeNumber = enemyMeleeNumber -1 --Deletes id's from tables and indicators
+	table.remove(currentEnemies, currentEnemies[self.id])
+	msg.post("main#gui", "meleeDeath") --Adds points to score
+	local pos = go.get_position()
+	msg.post("main#script", "enemyDeath", {pos = pos}) --Spawns blood animation
+end
+
+function update(self, dt)
+	if gamePaused == false then
+		self.enemyPos = go.get_position()
+		self.playerPos = go.get_position("player")
+		local difference = self.playerPos - self.enemyPos
+		local distance = vmath.length(difference)
+		local direction = vmath.normalize(self.playerPos - self.enemyPos) * self.speed
+		
+		if distance < self.detectionRange and distance > 6 then
+			self.dir = direction
+			if direction.x > 0 then
+				self.animDirection = "Right"
+			else
+				self.animDirection = "Left"
+			end
+		end
+		go.set_position(self.enemyPos + self.dir * self.speed * dt) 
+
+		local anim = hash("enemyMeleeIdle" .. self.animDirection)
+		
+		if self.dir.x ~= 0 then
+			anim = hash("enemyMeleeWalk" .. self.animDirection) --Changes animation based on direction
+		elseif self.dir.y > 0 then
+			anim = hash("enemyMeleeWalk" .. self.animDirection) --Vertical movement does not change animation side
+		elseif self.dir.y < 0 then
+			anim = hash("enemyMeleeWalk" .. self.animDirection)
+		end
+
+		if anim ~= self.currentAnim then
+			msg.post("#sprite", "play_animation", { id = anim })
+			self.currentAnim = anim
+		end
+		self.dir = vmath.vector3()
+		
+		self.healthRemaining =  (self.currentHealth / self.maxHealth) * 100 --Calculates percent health, then sets healthbar sprite using this number
+		if self.healthRemaining >= 0 then
+			self.healthRemRound = (math.ceil(self.healthRemaining / 10)) * 10
+			self.anim = hash(self.healthRemRound)
+			if self.anim ~= self.current_anim then
+				msg.post("#healthbar", "play_animation", { id = self.anim })
+				self.current_anim = self.anim
+			end
+		end
+		if self.currentHealth <= 0 then --Detects when enemy dies
+			msg.post("soundController", "enemyDeath", {playState = "play", soundId = "#enemyDeath"})
+			go.delete("#bulletFactory")
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then --Detects bullet collision and grenade collision
+		if message.enter then
+			if message.other_group == hash("bullet") then
+				msg.post("soundController", "enemyDamage", {soundId = "#enemyDamage", playState = "play"})
+				self.currentHealth = self.currentHealth - guns[currentWeapon]["damage"]
+			elseif message.other_group == hash("explode") then
+				self.currentHealth = 0
+			end
+		end
+	end
+	if message_id == hash("nuke") then --Detects if enemy is close enough to be hit by nuke powerup
+		local distance = vmath.length(self.playerPos - self.enemyPos)
+		if distance < 10000 then
+			self.currentHealth = 0
+		end
+	end 
+	if message_id == hash("contact_point_response") then --Prevents enemy from walking through walls
+		local displacement = message.normal * message.distance
+		if math.abs(displacement.x) > 20 or math.abs(displacement.y) > 20 then
+			displacement = displacement * 4
+		end
+		local newpos = self.enemyPos + displacement
+		go.set_position(newpos)
+	end
+end

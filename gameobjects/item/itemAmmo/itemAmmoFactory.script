@@ -1,0 +1,27 @@
+local function spawnItem()
+	local itemPos = vmath.vector3(0,0,0) --Uses similar code as enemy factories to spawn items on the ground
+	itemPos.x = math.random(-7000, 7000) --Randomly generates x and y coordinates
+	itemPos.y = math.random(-5000, 2800)
+	factory.create("#itemAmmoFactory", itemPos) --Spawns item at this coordinate
+end
+
+function init(self) --Adds factory id to table for easy message passing
+	table.insert(factories, go.get_id())
+	self.itemsToSpawn = 3 --Initially spawns in 3 items
+	math.randomseed(os.clock()*100000000) --Uses this to get a random set of math.random numbers, as they are the same each time the program is ran
+	for i = 1,self.itemsToSpawn do
+		spawnItem() --Calls the function to spawn an item. Each time the function is called, new coordinates are generated
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newLevel") then --Increases number of items to spawn upon new levels
+		self.itemsToSpawn = 2 + level --Increases number of items that spawn per level
+		if self.itemsToSpawn > 5 then
+			self.itemsToSpawn = 5 --Adds a limit of 5 items spawned per level per factory
+		end
+		for i = 1, self.itemsToSpawn do --Iterates once for each item to be spawned, and runs the spawn function
+			spawnItem()
+		end
+	end
+end

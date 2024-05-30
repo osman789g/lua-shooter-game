@@ -1,0 +1,4 @@
+tile_set: "/gameobjects/enemy/deathAnimation/enemy.atlas"
+default_animation: "enemyMeleeIdleRight"
+material: "/builtins/materials/sprite.material"
+blend_mode: BLEND_MODE_ALPHA

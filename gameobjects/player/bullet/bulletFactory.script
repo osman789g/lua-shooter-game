@@ -1,0 +1,116 @@
+local rendercam = require "rendercam.rendercam"
+
+guns = { 
+pistol = {range = 700, firerate = 0.1, damage = 30, speed = 0.5, ammo = 15, magazine = 12}, --range, reload, damage, bullet speed, magazine
+ak47 = {range = 1100, firerate = 0.1, damage = 30, speed = 0.3, ammo = 20, magazine = 20}, 	--Stores all stats of every weapon
+shotgun = {range = 400, firerate = 1, damage = 30, speed = 0.3, ammo = 8, magazine = 4},	--in this table, allows for stats to be easily adjusted
+sniper = {range = 1500, firerate = 1, damage = 100, speed = 0.2, ammo = 10, magazine = 4}}
+currentWeapon = "pistol" --Sets the player's weapon that they spawn in with
+currentAmmo = guns[currentWeapon]["ammo"] --Sets player's reserve ammo by referencing table
+currentMagazine = guns[currentWeapon]["magazine"] --Sets player's magazine by referencing table
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.reloaded = true --Stores when the player is able to shoot
+	self.pauseDelay = 0.2 --Prevents accidental shooting when clicking menu options, specifically unpausing the game. 
+end
+
+local function reloading(self) --Allows the player to shoot
+	self.reloaded = true
+end
+
+local function magazineReload(bulletsToReload)
+	for i = 0, bulletsToReload do --Iterates once for every bullet missing from the magazine
+		if (currentAmmo <= 0) or (currentMagazine == guns[currentWeapon]["magazine"]) then --Breaks if reserve ammo is 0 or magazine is same as the maximum
+			break
+		else
+			currentAmmo = currentAmmo - 1 --Removes 1 bullet from reserve ammo
+			currentMagazine = currentMagazine + 1 --Adds 1 bullet to current magazine
+		end
+	end
+end
+
+function update(self, dt)
+	if gamePaused == true then
+		self.pauseDelay = 0.2 --Sets pause delay to small number to prevent accidental shooting
+	elseif gamePaused == false and self.pauseDelay >= 0 then
+		self.pauseDelay = self.pauseDelay - dt --Counts down after game is unpaused
+	end
+end
+
+function on_input(self, action_id, action)
+	if gamePaused == false and self.pauseDelay <= 0 and playerDead == false then --Player can only shoot when alive, game is unpaused and no delay is active
+		if action_id == hash("r") and action.pressed then --Reloading script
+			if currentAmmo > 0 and currentMagazine ~= guns[currentWeapon]["magazine"] then
+				msg.post("soundController", "weaponReload", {soundId = "#weaponReload", playState = "play"})
+				msg.post("main", "reloaded")
+				local bulletsToReload = guns[currentWeapon]["magazine"] - currentMagazine
+				magazineReload(bulletsToReload)
+			end
+		end
+		if action_id == hash("lclick") then --Plays empty magazine sound when magazine is 0
+			if currentMagazine <= 0 and action.pressed then
+				msg.post("soundController", "weaponEmpty", {soundId = "#weaponEmpty", playState = "play"})
+			end
+			if currentMagazine > 0 then
+				local target = rendercam.screen_to_world_2d(action.screen_x, action.screen_y) --Calculates world position of mouse cursor
+				local playerPos = go.get_position("player")
+				local cursorPos = vmath.vector3(target.x - playerPos.x, target.y - playerPos.y,0) --Calculates distance between cursor and player
+				local bulletDirection = vmath.normalize(cursorPos) --Gets direction of cursor from player
+				local rotation = vmath.quat_rotation_z(math.atan2(bulletDirection.y, bulletDirection.x)) --Calculates angle of bullet rotation
+				if currentWeapon == "ak47" then
+					if self.reloaded == true then --Can only shoot if reloaded
+						msg.post("soundController", "shootAk47", {soundId = "#shootAk47", playState = "play"})
+						self.reloaded = false --Sets reload to false
+						msg.post("weapon#script", "akShoot")
+						timer.delay(guns.ak47["firerate"], false, function() reloading(self) end)
+						
+						local targetPos = vmath.vector3(playerPos.x + (bulletDirection.x * guns.ak47["range"]), --Adds weapon's range to player position
+						playerPos.y + (bulletDirection.y * guns.ak47["range"]), 0)
+						local bulletId = factory.create("#bulletFactory", playerPos, rotation) --Spawns bullet with rotation
+						go.animate(bulletId, "position", go.PLAYBACK_ONCE_FORWARD, targetPos, go.EASING_LINEAR, guns.ak47["speed"]) --Animates bullet towards target 
+						self.timer = timer.delay(guns.ak47["speed"], false,function() go.delete(bulletId) end) --Deletes bullet after it reaches the end of its animation
+					end
+				end
+				if action.pressed then
+					if currentWeapon == "pistol" then --Pistol is the only weapon without self.reloaded
+						msg.post("soundController", "shootPistol", {soundId = "#shootPistol", playState = "play"}) --Means that pistol is the only semi-automatic weapon that has to be clicked once per shot
+						msg.post("weapon#script", "pistolShoot")
+						timer.delay(guns.pistol["firerate"], false, function() reloading(self) end)
+						local targetPos = vmath.vector3(playerPos.x + (bulletDirection.x * guns.pistol["range"]), playerPos.y + (bulletDirection.y * guns.pistol["range"]), 0)
+						local bulletId = factory.create("#bulletFactory", playerPos, rotation)
+						go.animate(bulletId, "position", go.PLAYBACK_ONCE_FORWARD, targetPos, go.EASING_LINEAR, guns.pistol["speed"])
+						self.timer = timer.delay(guns.pistol["speed"], false,function() go.delete(bulletId) end)
+					end
+					elseif currentWeapon == "shotgun" then --Shotgun
+						if self.reloaded == true then
+							msg.post("soundController", "shootShotgun", {soundId = "#shootShotgun", playState = "play"})
+							self.reloaded = false
+							msg.post("weapon#script", "shotgunShoot")
+							timer.delay(guns.shotgun["firerate"], false, function() reloading(self) end)
+							
+							for i = 1,5 do --Spawns 5 bullets instead of 1 as this is a shotgun
+								local shotgunRandom = math.random(-80,80) --Offsets each bullet by a small number to add some spread to the bullets
+								local targetPos = vmath.vector3((playerPos.x+shotgunRandom)+(bulletDirection.x*guns.shotgun["range"]), 
+								(playerPos.y+shotgunRandom)+(bulletDirection.y * guns.shotgun["range"]), 0)
+								local bulletId = factory.create("#bulletFactory", playerPos, rotation)
+								go.animate(bulletId, "position", go.PLAYBACK_ONCE_FORWARD, targetPos, go.EASING_LINEAR, guns.shotgun["speed"])
+								self.timer = timer.delay(guns.shotgun["speed"], false,function() go.delete(bulletId) end)
+							end
+						end
+					elseif currentWeapon == "sniper" then
+						if self.reloaded == true then
+							msg.post("soundController", "shootSniper", {soundId = "#shootSniper", playState = "play"})
+							self.reloaded = false
+							msg.post("weapon#script", "sniperShoot")
+							timer.delay(guns.sniper["firerate"], false, function() reloading(self) end)
+							local targetPos = vmath.vector3(playerPos.x + (bulletDirection.x * guns.sniper["range"]), playerPos.y + (bulletDirection.y * guns.sniper["range"]), 0)
+							local bulletId = factory.create("#bulletFactory", playerPos, rotation)
+							go.animate(bulletId, "position", go.PLAYBACK_ONCE_FORWARD, targetPos, go.EASING_LINEAR, guns.sniper["speed"])
+							self.timer = timer.delay(guns.sniper["speed"], false,function() go.delete(bulletId) end)
+						end
+					end
+			end
+		end
+	end
+end
+

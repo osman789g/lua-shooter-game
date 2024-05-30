@@ -1,0 +1,71 @@
+local pickup = false
+local wep = "" --Stores weapon type that the player is touching
+
+function init(self)
+	table.insert(currentItems, go.get_id())
+	local scale = go.get("#sprite", "scale")
+	go.set("#sprite", "scale", scale / 2)
+	self.weaponType = ""
+	self.pos = go.get_position()
+	self.id = go.get_id()
+end
+
+local function updateSprite(self) --Changes sprite depending on weapon type
+	self.anim = hash(self.weaponType .. "Idle")
+	msg.post("#sprite", "play_animation", { id = self.anim })
+end
+function final(self)
+	table.remove(currentItems, currentItems[self.id])
+	table.remove(itemsTouching, itemsTouching[self.id])
+	msg.post("main#gui", "pickupFalse")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("weaponSpawn1") then 	--Determines type of weapon depending on random number that was 
+		self.weaponType = "pistol"				--generated and passed to this object
+		updateSprite(self)						--Updates the sprite so that it represents the weapon type
+	elseif message_id == hash("weaponSpawn2") then
+		self.weaponType = "ak47"
+		updateSprite(self)
+	elseif message_id == hash("weaponSpawn3") then
+		self.weaponType = "shotgun"
+		updateSprite(self)
+	elseif message_id == hash("weaponSpawn4") then
+		self.weaponType = "sniper"
+		updateSprite(self)
+	end
+	if message_id == hash("trigger_response") then
+		if message.other_group == hash("player") then
+			if message.enter then
+				pickup = true
+				wep = self.weaponType
+				msg.post("main#gui", "pickupTrue", {item = wep}) --Passes message to gui so that it updates the picture of the weapon sprite
+				table.insert(itemsTouching, self.id)
+			else
+				pickup = false
+				msg.post("main#gui", "pickupFalse")
+				table.remove(itemsTouching, itemsTouching[self.id])
+			end
+		end
+	end
+	if message_id == hash("newLevel") then
+		go.delete()
+	end
+	if message_id == hash("pickupItem") then
+		msg.post("soundController", "pickup", {soundId = "#pickup", playState = "play"}) --Posts message so that a sound is played when picked up
+		if currentWeapon == wep then --Checks if player's current weapon is the same as the weapon that they have just picked up
+			currentMagazine = guns[currentWeapon]["magazine"] --Restores magazine to full
+			currentAmmo = currentAmmo + guns[currentWeapon]["ammo"] --Adds weapon's base ammo reserve to current ammo reserve
+			msg.post("main", "reloaded") --Posts message to gui so that it updates the ammo numbers
+			go.delete()
+		else --Runs if player picks up a different weapon
+			currentWeapon = wep
+			msg.post("weapon", "changeWeapon") --Posts message to change sprites
+			msg.post("main", "changeWeapon")
+			currentAmmo = guns[currentWeapon]["ammo"] --Accesses base ammo and magazine size through the weapon table
+			currentMagazine = guns[currentWeapon]["magazine"]
+			msg.post("main", "reloaded") --Posts message to gui so that it updates the ammo numbers
+			go.delete()
+		end
+	end
+end

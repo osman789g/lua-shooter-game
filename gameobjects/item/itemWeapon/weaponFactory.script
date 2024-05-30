@@ -1,0 +1,26 @@
+local function spawnItem() --Please refer to /gameobjects/item/itemAmmo/itemAmmoFactory.script for more comments
+	local itemPos = go.get_position()
+	itemPos.x = math.random(-7000, 7000)
+	itemPos.y = math.random(-5000, 3000)
+	local id = factory.create("#itemWeaponFactory", itemPos) --Uses same code for spawning items at random coordinates
+	local weaponType = math.random(1,4) --Generates a random number and passes it to the object to determine the type of weapon it will be
+	msg.post(id, "weaponSpawn" .. weaponType)
+end
+
+function init(self)
+	table.insert(factories, go.get_id())
+	self.weaponsToSpawn = 2
+	math.randomseed(os.clock()*10000000)
+	for i = 1, self.weaponsToSpawn do
+		spawnItem()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newLevel") then
+		self.itemsToSpawn = 3
+		for i = 1, self.itemsToSpawn do
+			spawnItem()
+		end
+	end
+end

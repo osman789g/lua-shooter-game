@@ -1,0 +1,11 @@
+function init(self)
+	self.timerDelay = 0.8
+	go.set_scale(0.9)
+end
+
+function update(self, dt) -- Spawns when enemy dies to remove enemy hitbox
+	self.timerDelay = self.timerDelay - dt -- Plays length of animation, then deletes
+	if self.timerDelay <= 0 then
+		go.delete()
+	end
+end

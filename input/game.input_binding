@@ -1,0 +1,88 @@
+key_trigger {
+  input: KEY_W
+  action: "up"
+}
+key_trigger {
+  input: KEY_A
+  action: "left"
+}
+key_trigger {
+  input: KEY_S
+  action: "down"
+}
+key_trigger {
+  input: KEY_D
+  action: "right"
+}
+key_trigger {
+  input: KEY_J
+  action: "j"
+}
+key_trigger {
+  input: KEY_Z
+  action: "z"
+}
+key_trigger {
+  input: KEY_X
+  action: "x"
+}
+key_trigger {
+  input: KEY_C
+  action: "c"
+}
+key_trigger {
+  input: KEY_V
+  action: "v"
+}
+key_trigger {
+  input: KEY_G
+  action: "g"
+}
+key_trigger {
+  input: KEY_LSHIFT
+  action: "shift"
+}
+key_trigger {
+  input: KEY_R
+  action: "r"
+}
+key_trigger {
+  input: KEY_E
+  action: "e"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "esc"
+}
+key_trigger {
+  input: KEY_SPACE
+  action: ""
+}
+key_trigger {
+  input: KEY_I
+  action: "i"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_LEFT
+  action: "lclick"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_RIGHT
+  action: "rclick"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_MIDDLE
+  action: "mclick"
+}
+mouse_trigger {
+  input: MOUSE_WHEEL_UP
+  action: "scrollup"
+}
+mouse_trigger {
+  input: MOUSE_WHEEL_DOWN
+  action: "scrolldown"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_1
+  action: "touch"
+}

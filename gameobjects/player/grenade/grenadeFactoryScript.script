@@ -1,0 +1,27 @@
+local rendercam = require "rendercam.rendercam"
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+end
+
+local function spawnGrenade(action)
+	if itemGrenadeCount > 0 and playerDead == false then 
+		itemGrenadeCount = itemGrenadeCount - 1 --Removes grenade from inventory
+		msg.post("main", "grenade") --Posts message to main so that the gui can be updated
+		local mouseWorldPos = rendercam.screen_to_world_2d(action.screen_x, action.screen_y) --Gets world position of mouse: where the grenade will land
+		local playerPos = go.get_position("player") --Used to spawn grenade on top of the player
+		local grenadeId = factory.create("#grenadeFactory", playerPos)
+		local targetPos = vmath.vector3(0,0,0)
+		go.animate(grenadeId, "position", go.PLAYBACK_ONCE_FORWARD, mouseWorldPos, go.EASING_OUTCUBIC, 1.5) --Grenade starts fast then slows down once it reaches target
+	end
+end
+
+function on_input(self, action_id, action)
+	if gamePaused == false then
+		if action_id == hash("c") and itemGrenadeCount > 0 then
+			if action.pressed then --Spawns grenade if C is pressed and the player has grenades in their inventory and game is not paused
+				spawnGrenade(action) --Passes action as a parameter so that the coordinates of the mouse could be accessed
+			end
+		end
+	end
+end

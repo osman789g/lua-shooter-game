@@ -1,0 +1,74 @@
+function init(self)
+	self.gunState = "pistolIdle" --Sets weapon sprite to pistol
+	self.direction = vmath.vector3(1,0,0) --Sets x position to 1 so that a direction is definitely chosen
+	self.animDirection = "Right" --Right is equivalent to positive x 
+	self.currentDirection = "Right"
+	local scale = go.get("#sprite", "scale")
+	go.set("#sprite", "scale", scale / 2) --Reduces scale of sprite by half
+	self.inRange = false --Keeps track of whether ranged enemy is close enough to player
+	self.hidden = false --Keeps track of whether weapon is currently hidden or not
+end
+
+local function weaponIdle(self) --Used to revert to idle animation after pistol is shot and animation is played
+	self.currentIdle = "pistolIdle" .. self.animDirection --Uses last direction that the pistol was pointed in and concatenates it to animation name
+	self.anim = hash(self.currentIdle) --Sets the idle animation to anim so that it is played
+end
+
+function update(self, dt)
+	local enemyPos = go.get_position(self.id) --Gets position of enemy that spawned in the pistol
+	if gamePaused == false then --Checks if game is paused before doing any updates to save resources
+		go.set_position(enemyPos) --Ensures pistol always remains on enemy
+		if self.inRange == false then --Receives this information from the ranged enemy
+			if self.hidden == false then --If not in range and not currently hidden, disables sprite and sets hidden variable to true
+				msg.post("#sprite", "disable")
+				self.hidden = true
+			end
+		else --Only true when in range with player
+			if self.hidden == true then --If in range and hidden, unhides the sprite and sets hidden variable to false
+				msg.post("#sprite", "enable")
+				self.hidden = false
+			end
+			local target = go.get_position("player")
+			self.direction = vmath.normalize(target - enemyPos) --Calculates normalized vector between player and enemy
+			go.set_rotation(vmath.quat_rotation_z(math.atan2(self.direction.y, self.direction.x))) --Uses this to calculate angle of rotation
+			local posOffset = enemyPos + vmath.vector3(self.direction.x * 50, self.direction.y * 50, 1) --Sets weapon position so that it is always in front of enemy
+			go.set_position(posOffset) --Means that the weapon will not be behind the enemy while pointing at the enemy's back
+			if enemyPos.x - target.x > 0 then --Calculates animation direction via x positions between enemy and player
+				self.animDirection = "Left" 
+			else
+				self.animDirection = "Right"
+			end
+			if self.animDirection ~= self.currentDirection then --Only true when direction needs to be updated
+				if self.anim ~= hash("pistolShoot" .. self.animDirection) then 	--Waits for current shooting animation to finish before switching
+					self.anim = hash("pistolIdle" .. self.animDirection) 		--Prevents animation from being cut half way through
+					self.currentDirection = self.animDirection
+				end
+			end
+		end
+		if self.anim ~= self.currentAnim then
+			msg.post("#sprite", "play_animation", { id = self.anim })
+			self.currentAnim = self.anim
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("enemyId") then --Receives id from the enemy that spawns it in
+		self.id = message.enemyId
+	end
+	if message_id == hash("rangedDeath") then --Compares id of dead enemy with its own id. If they match, the object is deleted
+		if self.id == message.enemyId then
+			go.delete()
+		end
+	end
+	if message_id == hash("shoot") then --Receives shoot message from enemy to play shoot animation
+		self.gunState = "pistolShoot" .. self.animDirection --Uses direction and concatenation to determine whether it should use flipped animation
+		self.anim = hash(self.gunState)
+	end
+
+	if message_id == hash("inRange") then --Stores changes to being in range of player
+		self.inRange = true
+	elseif message_id == hash("outRange") then
+		self.inRange = false
+	end
+end

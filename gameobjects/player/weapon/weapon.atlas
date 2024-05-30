@@ -1,0 +1,351 @@
+animations {
+  id: "ak47ShootRight"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "ak47IdleRight"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "pistolShootRight"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 24
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "shotgunShootRight"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "sniperShootRight"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "pistolIdleRight"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "shotgunIdleRight"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "sniperIdleRight"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "ak47ShootLeft"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 1
+}
+animations {
+  id: "ak47IdleLeft"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 1
+}
+animations {
+  id: "pistolShootLeft"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 24
+  flip_horizontal: 0
+  flip_vertical: 1
+}
+animations {
+  id: "pistolIdleLeft"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/Glock-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 1
+}
+animations {
+  id: "shotgunShootLeft"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 1
+}
+animations {
+  id: "shotgunIdleLeft"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/Shotgun-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 1
+}
+animations {
+  id: "sniperShootLeft"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 1
+}
+animations {
+  id: "sniperIdleLeft"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/Sniper-0.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 1
+}
+animations {
+  id: "ak47Idle"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/AK47/AK47Idle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "pistolIdle"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Glock/GlockIdle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "shotgunIdle"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Shotgun/ShotgunIdle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "sniperIdle"
+  images {
+    image: "/assets/Weapon Set Pixel Art/Animation Sprite Sheet/Sniper/SniperIdle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

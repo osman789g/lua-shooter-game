@@ -1,0 +1,10 @@
+function init(self)
+	self.timer = 3
+end
+
+function update(self, dt)
+	self.timer = self.timer - dt --Ensures that the bullet is deleted after 3 seconds no matter what
+	if self.timer < 0 then
+		go.delete()
+	end
+end

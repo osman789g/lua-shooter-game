@@ -1,0 +1,36 @@
+local function sound_done(self, message_id, message, sender) --Runs when the current song ends
+	if message_id == hash("sound_done") and message.play_id == self.songPlaying then
+		self.songCount = self.songCount + 1 --Increases song count so that the next index of the song list is played
+		if self.songCount > 4 then --Prevents the index from going above the length of the list of songs
+			self.songCount = 1
+		end --Plays the song using the index. 
+		self.songPlaying = sound.play("#" .. self.randomList[self.songCount], nil, sound_done) --Runs this function when the song ends.
+	end
+end
+
+function on_message(self, message_id, message, sender) --Receives messages from various objects that require sounds
+	if message_id == hash("startMusic") then
+		self.soundList = {"gameMusic1", "gameMusic2", "gameMusic3", "gameMusic4"}
+		self.randomList = {1, 2, 3, 4} --Generates list of songs in random order
+		for i = 1,4 do
+			local randomNum = math.random(1,5-i)
+			self.randomList[i] = self.soundList[randomNum]
+			table.remove(self.soundList,randomNum)
+		end
+		self.songCount = 1
+		self.songId = self.randomList[self.songCount]
+		self.songPlaying = sound.play("#" .. self.songId, nil, sound_done)
+	end
+
+	if message_id == hash("pause") then --If game is paused, game music is paused and pause music is played
+		sound.pause("#menuMusic", false)
+		sound.pause("#" .. self.randomList[self.songCount], true)
+	elseif message_id == hash("unpause") then --Game music unpaused, pause screen music stopped
+		sound.pause("#menuMusic", true)
+		sound.pause("#" .. self.randomList[self.songCount], false)
+	else
+		if message.playState == "play" or message.playState == "stop" then
+			msg.post(message.soundId, message.playState .. "_sound")
+		end
+	end
+end

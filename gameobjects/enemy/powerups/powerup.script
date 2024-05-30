@@ -1,0 +1,38 @@
+powerupTouching = "" 	--Used to determine which instance of the powerup is in contact with the player
+						--Prevents all powerups from being picked up if one is touched.
+function init(self)
+	go.set_scale(1)
+	self.id = go.get_id()
+end
+
+function update(self, dt) --Updates sprite of powerup to the powerup type it corresponds to
+	if self.anim ~= self.currentAnim then --This line ensures that this is only done once to prevent redundancy
+		msg.post("#sprite", "play_animation", { id = self.anim }) --Plays animation using the id, as the names are the same
+		self.currentAnim = self.anim
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("powerup") then --Receives message from 
+		self.powerupType = message.powerupType --Determines powerup type
+		if self.powerupType == 1 then
+			self.powerupType = "instakill"
+		elseif self.powerupType == 2 then
+			self.powerupType = "nuke"
+		elseif self.powerupType == 3 then
+			self.powerupType = "rapidfire"
+		else
+			self.powerupType = "instakill" 	--Prevents errors from occurring if math.random function gives incorrect value
+		end									--by defaulting to powerup 1
+		self.anim = hash(self.powerupType)	--Sets animation to powerup type
+	end
+	if message_id == hash("trigger_response") then --Detects when player collision occurs
+		if message.other_group == hash("player") then
+			if message.enter then
+				powerupTouching = self.id --Changes variable to id of the powerup that the player is currently touching
+				msg.post("main", "powerup", {powerup = self.powerupType}) --Posts message to main script containing powerup type
+				go.delete(powerupTouching) --Deletes powerup that is touching the player
+			end
+		end
+	end
+end

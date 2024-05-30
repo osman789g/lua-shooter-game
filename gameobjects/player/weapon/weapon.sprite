@@ -1,0 +1,4 @@
+tile_set: "/gameobjects/player/weapon/weapon.atlas"
+default_animation: "pistolIdleRight"
+material: "/builtins/materials/sprite.material"
+blend_mode: BLEND_MODE_ALPHA

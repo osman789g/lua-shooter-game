@@ -1,0 +1,92 @@
+local rendercam = require "rendercam.rendercam"
+
+function init(self) --Animates weapon in the player's hand
+	msg.post(".", "acquire_input_focus")
+	self.gunState = "pistolIdle" --Sets the default animation to the idle pistol
+	self.direction = vmath.vector3(1,0,0)
+	self.animDirection = "Right" --Stores the real direction of the weapon (left or right)
+	self.currentDirection = "Right" --Stores the last direction of the weapon
+	self.infiniteAmmo = false
+end
+
+local function weaponIdle(self) --Reverts the animation back to its idle state
+	self.currentIdle = currentWeapon .. "Idle" .. self.animDirection
+	self.anim = hash(self.currentIdle)
+end
+
+function update(self, dt)
+	if gamePaused == false then
+		if self.animDirection ~= self.currentDirection then
+			if self.anim ~= hash(currentWeapon .. "ShootLeft") and self.anim ~= hash(currentWeapon .. "ShootRight") then
+				self.anim = hash(currentWeapon .. "Idle" .. self.animDirection) --Waits for weapon to stop shooting 
+				self.currentDirection = self.animDirection
+			end
+		end
+		if self.anim ~= self.currentAnim then
+			msg.post("#sprite", "play_animation", { id = self.anim })
+			self.currentAnim = self.anim
+		end
+	end
+	go.set_position(self.posOffset)
+end
+
+function on_input(self, action_id, action)
+	if action.x and action.y then
+		local playerPos = go.get_position("player")
+		self.target = rendercam.screen_to_world_2d(action.screen_x, action.screen_y)
+		self.direction = vmath.normalize(self.target - playerPos)
+		go.set_rotation(vmath.quat_rotation_z(math.atan2(self.direction.y, self.direction.x))) --Calculates angle between mouse and player
+		self.posOffset = playerPos + vmath.vector3(self.direction.x * 50, self.direction.y * 50, 1) --Adds offset so that it revolves around the player
+		--go.set_position(self.posOffset3)
+		if action.x > 960 then
+			self.animDirection = "Right" --Detects when the mouse crosses the player's x axis, and changes the animDirection
+		else
+			self.animDirection = "Left"
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("infiniteAmmo") then
+		self.infiniteAmmo = true --Enables infinite ammo
+	end
+
+	if message_id == hash("infiniteAmmoFalse") then
+		self.infiniteAmmo = false --Disables infinite ammo
+	end
+	
+	if message_id == hash("akShoot") then --Only removes bullets if infinite ammo is disabled
+		if self.infiniteAmmo == false then --Plays animation for corresponding weapon type, and posts message to gui to update ammo count
+			currentMagazine = currentMagazine - 1
+		end
+		
+		self.gunState = "ak47Shoot" .. self.animDirection
+		self.anim = hash(self.gunState)
+		msg.post("main", "shoot")
+	elseif message_id == hash("pistolShoot") then
+		if self.infiniteAmmo == false then
+			currentMagazine = currentMagazine - 1
+		end
+		self.gunState = "pistolShoot" .. self.animDirection
+		self.anim = hash(self.gunState)
+		msg.post("main", "shoot")
+	elseif message_id == hash("shotgunShoot") then
+		if self.infiniteAmmo == false then
+			currentMagazine = currentMagazine - 1
+		end
+		self.gunState = "shotgunShoot" .. self.animDirection
+		self.anim = hash(self.gunState)
+		msg.post("main", "shoot")
+	elseif message_id == hash("sniperShoot") then
+		if self.infiniteAmmo == false then
+			currentMagazine = currentMagazine - 1
+		end
+		self.gunState = "sniperShoot" .. self.animDirection
+		self.anim = hash(self.gunState)
+		msg.post("main", "shoot")
+	end
+	timer.delay(guns[currentWeapon]["firerate"], false, function () weaponIdle(self) end) --Sets animation to idle after the weapon can shoot again. 
+	if message_id == hash("changeWeapon") then
+		self.anim = hash(currentWeapon .. "Idle" .. self.animDirection)
+	end
+end

@@ -1,0 +1,159 @@
+function init(self) --Similar to melee enemy, sets up attributes and inserts itself into tables
+	self.enemyPos = go.get_position()
+	self.weaponId = factory.create("#enemyWeaponFactory", self.enemyPos) --Spawns in weapon and indicator for this enemy
+	self.indicatorId = factory.create("#enemyIndicator", self.enemyPos)
+	self.id = go.get_id()
+	table.insert(currentEnemies, self.id)
+	msg.post(self.weaponId, "enemyId",  {enemyId = self.id}) --Passes its id onto the indicator and weapon
+	msg.post(self.indicatorId, "enemyId", {enemyId = self.id})
+	self.detectionRangeMax = 1600
+	self.detectionRangeMin = 300
+	self.bulletRange = 1500
+	self.bulletSpeed = 1
+	self.moveSpeed = 2
+	self.reloaded = false
+	self.maxHealth = 100
+	self.speed = 500
+	self.currentHealth = self.maxHealth
+	self.reloadTime = 4 - (0.4  * level) --Reload time decreases as levels progress
+	if self.reloadTime < 2 then
+		self.reloadTime = 2
+	end
+	self.reloadTimer = self.reloadTime
+	self.dir = vmath.vector3()
+	self.animDirection = "Right"
+	self.inRangeTemp = false
+	go.set_scale(0.5)
+end
+
+function final(self) --Removes itself from tables, deletes weapon and indicator, checks to see if it should spawn powerup, adds points to score
+	enemyRangedNumber = enemyRangedNumber - 1
+	msg.post("main#gui", "rangedDeath")
+	msg.post(self.weaponId, "rangedDeath",  {enemyId = self.id})
+	msg.post(self.indicatorId, "death",  {enemyId = self.id})
+	math.randomseed(os.clock()*100000)
+	local powerupChance = math.random(1, 10)
+	if powerupChance == 1 then
+		msg.post("powerupFactory", "spawnPowerup", {position = self.enemyPos})
+	end
+	table.remove(currentEnemies, currentEnemies[self.id])
+	msg.post("main#script", "enemyDeath", {pos = self.enemyPos})
+end
+
+local function shoot(self)
+	msg.post(self.weaponId, "shoot") --Posts to weapon so that an animation is played
+	msg.post("soundController", "enemyShoot", {soundId = "#enemyShoot", playState = "play"})
+	self.reloaded = false
+	local bulletDirection = vmath.vector3(0,0,0) --Calculates vector between player and enemy
+	bulletDirection.x = self.playerPos.x - self.enemyPos.x 
+	bulletDirection.y = self.playerPos.y - self.enemyPos.y
+	bulletDirection = vmath.normalize(bulletDirection)
+	local targetPos = vmath.vector3(self.enemyPos.x + (bulletDirection.x * self.bulletRange), --Multiplies normalised vector by bullet range
+	self.enemyPos.y + (bulletDirection.y * self.bulletRange), 0)
+	local rotation = vmath.quat_rotation_z(math.atan2(bulletDirection.y, bulletDirection.x))--Calculates rotation angle for bullet
+	local bulletId = factory.create("#enemyBulletFactory", self.enemyPos, rotation)				--and spawns instance of the bullet on enemy with this rotation
+	go.animate(bulletId, "position", go.PLAYBACK_ONCE_FORWARD, targetPos, go.EASING_LINEAR, self.bulletSpeed) --Animates smooth movement of bullet towards target location
+	timer.delay(self.bulletSpeed, false,function() go.delete(bulletId) end) --Deletes bullet after animation stops as the timings are the same
+	self.reloadTimer = self.reloadTime
+end
+
+function update(self, dt) --Uses same movement script as the melee enemy
+	if gamePaused == false then
+		if self.reloadTimer > 0 then
+			self.reloadTimer = self.reloadTimer - dt
+		elseif self.reloadTimer <= 0 then
+			self.reloaded = true
+		end
+		self.enemyPos = go.get_position()
+		self.playerPos = go.get_position("main:/player")
+		local distance = vmath.length(self.playerPos - self.enemyPos)
+		self.enemyPos = go.get_position()
+		self.playerPos = go.get_position("player")
+		local difference = self.playerPos - self.enemyPos
+		local distance = vmath.length(difference)
+		local direction = vmath.normalize(self.playerPos - self.enemyPos) * self.speed
+		if distance < self.detectionRangeMax then
+			self.inRange = true
+			if distance > self.detectionRangeMin then
+				self.dir = direction
+			end
+			if direction.x > 0 then
+				self.animDirection = "Right"
+			else
+				self.animDirection = "Left"
+			end
+		else
+			self.inRange = false
+		end
+		go.set_position(self.enemyPos + self.dir * self.speed * dt) 
+		if self.inRange ~= self.inRangeTemp then
+			if self.inRange == true then
+				msg.post(self.weaponId, "inRange") --Shows weapon sprite if player and enemy are close
+				self.inRangeTemp = self.inRange
+			else
+				msg.post(self.weaponId, "outRange")	--Used to hide the weapon sprite if enemy is out of range
+				self.inRangeTemp = self.inRange
+			end
+		end
+		if (distance < self.bulletRange - 200) then --Checks if enemy is close enough to shoot at player
+			if self.reloaded == true then
+				shoot(self) --If enemy is close enough and shooting is not on cooldown, the enemy shoots
+			end
+		end
+		if vmath.length_sqr(self.dir) > 1 then --Used to prevent faster movement if enemy is moving diagonally
+			self.dir = vmath.normalize(self.dir)
+		end
+		go.set_position(self.enemyPos + self.dir * self.speed * dt) --Used to set up the animation based on the direction of movement. 
+		local anim = hash("enemyRangedIdle" .. self.animDirection) --If no movement is detected, then idle animation is played
+		if self.dir.x ~= 0 then
+			anim = hash("enemyRangedWalk" .. self.animDirection)
+		elseif self.dir.y > 0 then
+			anim = hash("enemyRangedWalk" .. self.animDirection)
+		elseif self.dir.y < 0 then
+			anim = hash("enemyRangedWalk" .. self.animDirection)
+		end
+		if anim ~= self.currentAnim then
+			msg.post("#sprite", "play_animation", { id = anim })
+			self.currentAnim = anim
+		end
+		self.dir = vmath.vector3()
+		self.healthRemaining =  (self.currentHealth / self.maxHealth) * 100 --Used to calculate healthbar sprite animation
+		if self.healthRemaining >= 0 then
+			self.healthRemRound = (math.ceil(self.healthRemaining / 10)) * 10 --Rounds healthbar upwards to nearest 10
+			self.anim = hash(self.healthRemRound)
+			if self.anim ~= self.current_anim then --Used to prevent playing the same animation redundantly
+				msg.post("#healthbar", "play_animation", { id = self.anim })
+				self.current_anim = self.anim
+			end
+		end
+		if self.currentHealth <= 0 then
+			msg.post("soundController", "enemyDeath", {soundId = "#enemyDeath", playState = "play"}) --Plays sound to controller
+			go.delete("#bulletFactory")
+			go.delete("#enemyWeaponFactory") --Deletes its factory that allows it to shoot
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then --Detects collisions with bullets or grenades
+		if message.enter then
+			if message.other_group == hash("bullet") then
+				msg.post("soundController", "enemyDamage", {soundId = "#enemyDamage", playState = "play"})
+				self.currentHealth = self.currentHealth - guns[currentWeapon]["damage"] --Removes health based on damage in weapon table
+			elseif message.other_group == hash("explode") then
+				self.currentHealth = self.currentHealth - 150
+			end
+		end
+	end
+	if message_id == hash("nuke") then
+		local playerPos = go.get_position("main:/player")
+		local distance = vmath.length(playerPos - self.enemyPos) --Calculates distance between enemy and player, as player and nuke will be the same.
+		if distance < 10000 then --If close enough, the enemy dies instantly
+			self.currentHealth = 0
+		end
+	end
+	if message_id == hash("contact_point_response") then --Prevents enemy from moving off the boundaries of the map
+		local newPos = self.enemyPos + message.normal * message.distance
+		go.set_position(newPos)
+	end
+end

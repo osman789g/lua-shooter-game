@@ -1,0 +1,47 @@
+local pickup = false
+ammoTouching = "" --Stores current ammo box instance touched by player to prevent them all from being picked up at once
+
+function init(self) --Stores id and adds it to table that contains list of all current items
+	self.id = go.get_id()
+	table.insert(currentItems, self.id) --Adds itself to list of all items so that messages can be easily passed
+	local s = go.get_scale() --Scales down object
+	s = s / 3
+	go.set_scale(s)
+end
+
+function final(self) --Removes object id from item tables and removes the pick up message from the screen
+	table.remove(currentItems, currentItems[self.id])
+	table.remove(itemsTouching, itemsTouching[self.id])
+	msg.post("main#gui", "pickupFalse")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.other_group == hash("player") then
+			if message.enter then --Only activates once when player first touches the item
+				pickup = true
+				ammoTouching = self.id --Sets ammoTouching variable to current id
+				msg.post("main#gui", "pickupTrue", {item = "ammo"}) --Posts to gui to create message to tell player that they can pick up the item and also
+				table.insert(itemsTouching, self.id) 				-- the type of item. Also adds to another table that stores currently touched items
+			else --If player not in contact with item, removes item from table and removes pickup message from gui
+				pickup = false
+				msg.post("main#gui", "pickupFalse")
+				table.remove(itemsTouching, itemsTouching[self.id])
+			end
+		end
+	end
+	if message_id == hash("newLevel") then --Deletes item upon new level starting
+		go.delete()
+	end
+	if message_id == hash("pickupItem") then --Receives message from input controller
+		msg.post("soundController", "pickup", {soundId = "#pickup", playState = "play"}) --Posts message to sound controller
+		currentAmmo = currentAmmo + math.ceil(guns[currentWeapon]["ammo"] / 2) --Adds ammo to ammo reserve
+		if currentAmmo > 999 then --Adds a limit to ammo of 999
+			currentAmmo = 999
+		end
+		msg.post("main#gui", "reloaded") --Posts message to gui to update ammo number
+		pickup = false
+		msg.post("main#gui", "pickupFalse") --Posts message to gui to remove pick up message
+		go.delete(ammoTouching) --Deletes id of object that was touched at the time that the player pressed the pick up button
+	end
+end
